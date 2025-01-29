@@ -1,5 +1,8 @@
 # PseudoConsole.Core
 
+A .NET wrapper library for executing commands in a pseudo console environment
+
+# Introduction
 This refactoring offers several benefits:
 
 ## Clean Public API:
