@@ -155,27 +155,58 @@ namespace PseudoConsoleExample
                     var buffer = new byte[4096];
                     while (true)
                     {
-                        var read = 0;
-                        var success = ReadFile(
-                            _outputReadSide.DangerousGetHandle(),
-                            buffer,
-                            buffer.Length,
-                            out read,
-                            IntPtr.Zero);
+                        int read;
+                        try
+                        {
+                            var success = ReadFile(
+                                _outputReadSide.DangerousGetHandle(),
+                                buffer,
+                                buffer.Length,
+                                out read,
+                                IntPtr.Zero);
 
-                        if (!success || read == 0)
-                            break;
+                            if (!success || read == 0)
+                            {
+                                break;
+                            }
 
-                        Console.Write(System.Text.Encoding.UTF8.GetString(buffer, 0, read));
+
+                            Console.Write(System.Text.Encoding.UTF8.GetString(buffer, 0, read));
+                        }
+                        catch (Exception)
+                        {
+                            break;  // Exit the thread on any error
+                        }
                     }
                 });
 
 
                 outputThread.Start();
 
-                // Wait for the process to exit
-                WaitForSingleObject(processInfo.hProcess, INFINITE);
-                outputThread.Join();
+                try
+                {
+                    WaitForSingleObject(processInfo.hProcess, INFINITE);
+
+                    // Get exit code to ensure process is really done
+                    uint exitCode;
+                    if (GetExitCodeProcess(processInfo.hProcess, out exitCode))
+                    {
+                        // Close write side first
+                        _outputWriteSide.Dispose();
+
+                        // Give the read thread a chance to get all remaining data
+                        if (!outputThread.Join(1000))
+                        {
+                            outputThread.Interrupt();
+                            outputThread.Join(100); // Short wait for interrupt
+                        }
+                    }
+                }
+                catch
+                {
+                    outputThread.Interrupt();
+                    throw;
+                }
             }
             catch
             {
@@ -339,6 +370,9 @@ namespace PseudoConsoleExample
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern void DeleteProcThreadAttributeList(IntPtr lpAttributeList);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
         #endregion
     }
 }
