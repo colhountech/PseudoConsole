@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.0.0-beta6</Version>
+    <Version>1.0.0-beta7</Version>
     <TargetFrameworks>net8.0-windows;net9.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,7 +10,7 @@
     <PackageDescription>A .NET wrapper library for executing commands in a pseudo console environment - Windows Only</PackageDescription>
     <RepositoryUrl>https://github.com/colhountech/PseudoConsole</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>..\README.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   
   <ItemGroup>
