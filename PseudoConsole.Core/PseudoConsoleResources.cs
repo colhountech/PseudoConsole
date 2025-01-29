@@ -29,21 +29,6 @@ namespace PseudoConsole.Core
             private IntPtr _processHandle;
             private IntPtr _threadHandle;
 
-            private PseudoConsoleResources(
-                SafeFileHandle inputReadSide,
-                SafeFileHandle inputWriteSide,
-                SafeFileHandle outputReadSide,
-                SafeFileHandle outputWriteSide,
-                IntPtr pseudoConsoleHandle,
-                STARTUPINFOEX startupInfo)
-            {
-                _inputReadSide = inputReadSide;
-                _inputWriteSide = inputWriteSide;
-                _outputReadSide = outputReadSide;
-                _outputWriteSide = outputWriteSide;
-                _pseudoConsoleHandle = pseudoConsoleHandle;
-                _startupInfo = startupInfo;
-            }
 
         public PseudoConsoleResources(int width = 120, int height = 30)
         {
