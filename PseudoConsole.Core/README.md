@@ -1,8 +1,40 @@
-# PseudoConsole.Core
+﻿# PseudoConsole.Core
 
 A .NET wrapper library for executing commands in a pseudo console environment - Windows only.
 
-## QuickStart
+# Introduction
+This refactoring offers several benefits:
+
+## Clean Public API:
+
+* Users only interact with PseudoConsoleProcess class
+* Simple event-based or callback-based output handling
+* Hides all the complexity of Win32 APIs
+
+
+## Better Separation of Concerns:
+
+* NativeMethods: Contains all P/Invoke code
+* IPseudoConsoleResources: Defines the internal interface
+* PseudoConsoleResources: Internal implementation
+* PseudoConsoleProcess: Public facade
+
+
+## Flexible Output Handling:
+
+* Event-based approach for continuous monitoring
+* Direct callback for simple usage
+* Both can be used simultaneously
+
+
+## More Library-Friendly:
+
+* Internal implementation details are hidden
+* Clear public API surface
+* Easy to version and maintain
+
+
+## To use this in a project:
 
 ```c#
 using PseudoConsole.Core;
