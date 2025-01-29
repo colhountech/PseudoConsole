@@ -9,7 +9,6 @@
     <Company>ColhounTech</Company>
     <PackageDescription>A .NET wrapper library for executing commands in a pseudo console environment - Windows Only</PackageDescription>
     <RepositoryUrl>https://github.com/colhountech/PseudoConsole</RepositoryUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
