@@ -1,18 +1,43 @@
-Looking at the complete code, everything looks correct and well-structured. The code includes:
+This refactoring offers several benefits:
 
-Proper handle cleanup in both success and error paths
-Correct pipe handling with proper closing sequence
-Thread management with timeouts and interrupts
-Process exit code verification
-All necessary Win32 API declarations
-Proper resource disposal in the Dispose method
+Clean Public API:
 
-The structure now ensures:
+Users only interact with PseudoConsoleProcess class
+Simple event-based or callback-based output handling
+Hides all the complexity of Win32 APIs
 
-The process will be created correctly with the pseudo console
-Output will be captured and displayed
-Resources will be cleaned up properly
-Threads won't be left hanging
-Handles won't leak
 
-This version should work reliably and terminate properly when the command completes. Have you tried running it with this latest version? It should now complete the dir /s /b command and exit cleanly.
+Better Separation of Concerns:
+
+NativeMethods: Contains all P/Invoke code
+IPseudoConsoleResources: Defines the internal interface
+PseudoConsoleResources: Internal implementation
+PseudoConsoleProcess: Public facade
+
+
+Flexible Output Handling:
+
+Event-based approach for continuous monitoring
+Direct callback for simple usage
+Both can be used simultaneously
+
+
+More Library-Friendly:
+
+Internal implementation details are hidden
+Clear public API surface
+Easy to version and maintain
+
+
+
+To use this in a project:
+csharpCopyusing PseudoConsole.Core;
+
+// Simple usage
+using var console = new PseudoConsoleProcess();
+console.ExecuteCommand("dir /s /b", Console.Write);
+
+// Or with event handling
+using var console2 = new PseudoConsoleProcess(width: 120, height: 30);
+console2.OutputReceived += output => Console.Write(output);
+console2.ExecuteCommand("your_command");
