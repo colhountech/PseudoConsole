@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <Version>1.0.0-beta2</Version>
-    <TargetFrameworks>net7.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows;net9.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Authors>Micheal Colhoun</Authors>
     <Company>ColhounTech</Company>
-    <PackageDescription>A .NET wrapper library for executing commands in a pseudo console environment</PackageDescription>
+    <PackageDescription>A .NET wrapper library for executing commands in a pseudo console environment - Windows Only</PackageDescription>
     <RepositoryUrl>https://github.com/colhountech/PseudoConsole</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

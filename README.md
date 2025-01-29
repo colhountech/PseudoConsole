@@ -1,6 +1,6 @@
 # PseudoConsole.Core
 
-A .NET wrapper library for executing commands in a pseudo console environment
+A .NET wrapper library for executing commands in a pseudo console environment - Windows only.
 
 # Introduction
 This refactoring offers several benefits:

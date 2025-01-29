@@ -1,4 +1,9 @@
-﻿# To use this in a project:
+﻿# PseudoConsoleExample
+
+Example of how to use the  PseudoConsole.Core library for executing commands in a pseudo console environment - Windows only.
+
+
+# To use this in a project:
 
 ```c#
 using PseudoConsole.Core;
