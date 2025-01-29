@@ -37,8 +37,8 @@ namespace PseudoConsoleExample
         // To this:
         private STARTUPINFOEX _startupInfo;  // Remove readonly
 
-        private readonly IntPtr _processHandle;
-        private readonly IntPtr _threadHandle;
+        private  IntPtr _processHandle;
+        private  IntPtr _threadHandle;
 
         private PseudoConsole(
             SafeFileHandle inputReadSide,
@@ -46,9 +46,7 @@ namespace PseudoConsoleExample
             SafeFileHandle outputReadSide,
             SafeFileHandle outputWriteSide,
             IntPtr pseudoConsoleHandle,
-            STARTUPINFOEX startupInfo,
-            IntPtr processHandle,
-            IntPtr threadHandle)
+            STARTUPINFOEX startupInfo)
         {
             _inputReadSide = inputReadSide;
             _inputWriteSide = inputWriteSide;
@@ -56,8 +54,6 @@ namespace PseudoConsoleExample
             _outputWriteSide = outputWriteSide;
             _pseudoConsoleHandle = pseudoConsoleHandle;
             _startupInfo = startupInfo;
-            _processHandle = processHandle;
-            _threadHandle = threadHandle;
         }
 
         public static PseudoConsole Create()
@@ -115,67 +111,105 @@ namespace PseudoConsoleExample
                 outputReadSide,
                 outputWriteSide,
                 hPC,
-                startupInfo,
-                IntPtr.Zero,
-                IntPtr.Zero);
+                startupInfo);
         }
 
         public void Run(string command)
         {
+            // Change the command to use cmd.exe explicitly
+            var cmdPath = System.IO.Path.Combine(
+                Environment.SystemDirectory,
+                "cmd.exe"
+            );
+            var commandLine = $"{cmdPath} /c {command}";
+
+
             var processInfo = new PROCESS_INFORMATION();
-            var success = CreateProcess(
-                null,
-                command,
-                IntPtr.Zero,
-                IntPtr.Zero,
-                false,
-                EXTENDED_STARTUPINFO_PRESENT,
-                IntPtr.Zero,
-                null,
-                ref _startupInfo,
-                out processInfo);
-
-            if (!success)
-                throw new InvalidOperationException($"Failed to create process: {Marshal.GetLastWin32Error()}");
-
-            // Start reading thread
-            var outputThread = new Thread(() =>
+            try
             {
-                var buffer = new byte[4096];
-                while (true)
+                var success = CreateProcess(
+                    null,
+                    commandLine,
+                    IntPtr.Zero,
+                    IntPtr.Zero,
+                    true,
+                    EXTENDED_STARTUPINFO_PRESENT,
+                    IntPtr.Zero,
+                    null,
+                    ref _startupInfo,
+                    out processInfo);
+
+
+
+                if (!success)
+                    throw new InvalidOperationException($"Failed to create process: {Marshal.GetLastWin32Error()}");
+
+                // Store the handles for cleanup
+                _processHandle = processInfo.hProcess;
+                _threadHandle = processInfo.hThread;
+
+
+                // Start reading thread
+                var outputThread = new Thread(() =>
                 {
-                    var read = 0;
-                    var success = ReadFile(
-                        _outputReadSide.DangerousGetHandle(),
-                        buffer,
-                        buffer.Length,
-                        out read,
-                        IntPtr.Zero);
+                    var buffer = new byte[4096];
+                    while (true)
+                    {
+                        var read = 0;
+                        var success = ReadFile(
+                            _outputReadSide.DangerousGetHandle(),
+                            buffer,
+                            buffer.Length,
+                            out read,
+                            IntPtr.Zero);
 
-                    if (!success || read == 0)
-                        break;
+                        if (!success || read == 0)
+                            break;
 
-                    Console.Write(System.Text.Encoding.UTF8.GetString(buffer, 0, read));
-                }
-            });
+                        Console.Write(System.Text.Encoding.UTF8.GetString(buffer, 0, read));
+                    }
+                });
 
-            outputThread.Start();
 
-            // Wait for the process to exit
-            WaitForSingleObject(processInfo.hProcess, INFINITE);
-            outputThread.Join();
+                outputThread.Start();
+
+                // Wait for the process to exit
+                WaitForSingleObject(processInfo.hProcess, INFINITE);
+                outputThread.Join();
+            }
+            catch
+            {
+                if (processInfo.hProcess != IntPtr.Zero)
+                    CloseHandle(processInfo.hProcess);
+                if (processInfo.hThread != IntPtr.Zero)
+                    CloseHandle(processInfo.hThread);
+                throw;
+            }
         }
 
         public void Dispose()
         {
-            ClosePseudoConsole(_pseudoConsoleHandle);
+            if (_pseudoConsoleHandle != IntPtr.Zero)
+                ClosePseudoConsole(_pseudoConsoleHandle);
+
             if (_startupInfo.lpAttributeList != IntPtr.Zero)
             {
                 DeleteProcThreadAttributeList(_startupInfo.lpAttributeList);
                 Marshal.FreeHGlobal(_startupInfo.lpAttributeList);
             }
-            CloseHandle(_processHandle);
-            CloseHandle(_threadHandle);
+
+            if (_processHandle != IntPtr.Zero)
+            {
+                CloseHandle(_processHandle);
+                _processHandle = IntPtr.Zero;
+            }
+
+            if (_threadHandle != IntPtr.Zero)
+            {
+                CloseHandle(_threadHandle);
+                _threadHandle = IntPtr.Zero;
+            }
+
             _inputReadSide?.Dispose();
             _inputWriteSide?.Dispose();
             _outputReadSide?.Dispose();
